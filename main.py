@@ -14,11 +14,13 @@ class DataProcessor:
         self.filtered_data = None
 
     def read_csv_by_date(self, file_path, date_column, target_date):
+        """Читает CSV-файл и возвращает только строки с заданной датой."""
         df = pd.read_csv(file_path)
         df[date_column] = pd.to_datetime(df[date_column], unit='s')
         return df[df[date_column].dt.date == pd.Timestamp(target_date).date()]
 
     def load_data(self, client_file_path, server_file_path, target_date):
+        """Загружает данные из client.csv и server.csv за заданную дату."""
         self.client_data = self.read_csv_by_date(
             client_file_path,
             'timestamp',
@@ -32,6 +34,7 @@ class DataProcessor:
         )
 
     def merge_data_by_error_id(self):
+        """Объединяет данные из client.csv и server.csv по error_id."""
         if self.client_data is None or self.server_data is None:
             print("Client or server data not loaded.")
             return
@@ -69,25 +72,22 @@ class DataProcessor:
         self.merged_data = self.merged_data[columns_order]
 
     def filter_cheaters(self):
+        """Исключает cheaters из объединенного DataFrame."""
         if self.merged_data is None:
             print("No merged data to filter.")
             return
 
-        # Загрузка данных из таблицы cheaters в DataFrame
         connection = sqlite3.connect(DATABASE_NAME)
         cheaters_data = pd.read_sql('SELECT * FROM cheaters', connection)
         connection.close()
 
-        # Преобразование ban_time и timestamp в формат datetime
         self.merged_data['timestamp'] = pd.to_datetime(
             self.merged_data['timestamp'], unit='s'
         )
         cheaters_data['ban_time'] = pd.to_datetime(cheaters_data['ban_time'])
 
-        # Инициализация индексов для удаления
         to_remove = pd.Series([False] * len(self.merged_data))
 
-        # Выбор player_id, которые нужно фильтровать
         cheater_ids = cheaters_data['player_id'].unique()
 
         # Сравнение времени бана и времени сервера
@@ -108,6 +108,7 @@ class DataProcessor:
         self.filtered_data = self.merged_data.copy()
 
     def insert_into_sqlite(self, table_name):
+        """Вставляет отфильтрованные данные в SQLite таблицу."""
         if self.filtered_data is None:
             print('No filtered data to insert.')
             return
