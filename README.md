@@ -45,6 +45,6 @@ python main.py
 * Создание таблицы в бд:
 <img src="images/new_table.png" alt="Alt text" title="Optional Title" width="300" />
 * Наполнение данными:
-<img src="images/data.png" alt="Alt text" title="Optional Title" width="400" />
+<img src="images/data.png" alt="Alt text" title="Optional Title" width="550" />
 * Использование памяти:
 <img src="images/memory.png" alt="Alt text" title="Optional Title" width="400" />
