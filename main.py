@@ -3,6 +3,7 @@ import sqlite3
 import pandas as pd
 
 from database_setup import DATABASE_NAME, create_table
+from memory_profiler import profile_memory_usage
 
 
 class DataProcessor:
@@ -108,7 +109,7 @@ class DataProcessor:
 
     def insert_into_sqlite(self, table_name):
         if self.filtered_data is None:
-            print("No filtered data to insert.")
+            print('No filtered data to insert.')
             return
 
         connection = sqlite3.connect(DATABASE_NAME)
@@ -122,10 +123,12 @@ if __name__ == '__main__':
     create_table()
     processor = DataProcessor()
 
-    # Загружаем данные из CSV файлов за определенную дату
-    processor.load_data("client.csv", "server.csv", target_date="2021-04-21")
-
-    processor.merge_data_by_error_id()
-    processor.filter_cheaters()
-
-    processor.insert_into_sqlite('data_table')
+    profile_memory_usage(
+        processor.load_data,
+        'client.csv',
+        'server.csv',
+        target_date='2021-04-21'
+    )
+    profile_memory_usage(processor.merge_data_by_error_id)
+    profile_memory_usage(processor.filter_cheaters)
+    profile_memory_usage(processor.insert_into_sqlite, 'data_table')
